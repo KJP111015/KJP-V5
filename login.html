@@ -772,7 +772,7 @@
          index.html এবং login.html একই SDK version (12.10.0) ব্যবহার করে
     ════════════════════════════════════════════════════════════════════ -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
         import {
             getAuth,
             createUserWithEmailAndPassword,
@@ -782,24 +782,33 @@
             onAuthStateChanged,
             signOut,
             reload
-        } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+        } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
         import {
             getDatabase,
             ref,
             set,
             update
-        } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+        } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+        document.addEventListener('DOMContentLoaded', async function () {
 
         // ── Config সার্ভার থেকে নেওয়া হচ্ছে ──
-        const _cfgRes = await fetch('/api/config');
-        const _cfg    = await _cfgRes.json();
-        const firebaseConfig = _cfg.firebase;
+        let app, auth, database;
+        try {
+            const _cfgRes = await fetch('/api/config');
+            if (!_cfgRes.ok) throw new Error('Config fetch failed: ' + _cfgRes.status);
+            const _cfg    = await _cfgRes.json();
+            const firebaseConfig = _cfg.firebase;
+            app      = initializeApp(firebaseConfig);
+            auth     = getAuth(app);
+            database = getDatabase(app);
+        } catch (err) {
+            document.getElementById('loadingContainer').innerHTML =
+                '<p style="color:#b91c1c;font-size:0.9rem;">⚠️ Configuration load failed. Please refresh the page.</p>';
+            console.error('Config error:', err);
+            return;
+        }
 
-        const app      = initializeApp(firebaseConfig);
-        const auth     = getAuth(app);
-        const database = getDatabase(app);
-
-        document.addEventListener('DOMContentLoaded', function () {
 
             /* ── DOM refs ── */
             const loadingContainer    = document.getElementById('loadingContainer');
