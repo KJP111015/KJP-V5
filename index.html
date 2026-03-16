@@ -273,8 +273,8 @@
         .thinking-dots span:nth-child(3){animation-delay:0s;}
         @keyframes pulseScale{0%,80%,100%{transform:scale(0.5);opacity:0.3;}40%{transform:scale(1.2);opacity:1;}}
 
-        .typing-cursor{display:inline-block;width:2px;height:1.1em;background:var(--text-main);margin-left:2px;vertical-align:text-bottom;border-radius:1px;animation:cursorBlink 0.65s step-end infinite;}
-        @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+        .typing-cursor{display:inline-block;width:7px;height:7px;background:var(--text-main);margin-left:3px;vertical-align:middle;border-radius:50%;animation:cursorBlink 0.65s ease-in-out infinite;}
+        @keyframes cursorBlink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.2;transform:scale(0.6);}}
 
         .popover-menu{position:absolute;bottom:calc(100% + 8px);left:0;background:var(--bg-surface);border:1px solid var(--border-light);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.15);padding:6px;width:250px;display:none;flex-direction:column;z-index:500;}
         .popover-menu.show{display:flex;animation:slideUp 0.2s ease;}
@@ -553,7 +553,7 @@
                 <div class="user-avatar" id="avatar">G</div>
                 <div class="user-info">
                     <div class="user-name" id="username">Guest User</div>
-                    <div class="user-email" id="user-email">guest@example.com</div>
+                    <div class="user-email" id="user-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4e293b2b3d3a0e2b362f233e222b602d2123">[email&#160;protected]</a></div>
                 </div>
                 <svg class="icon" style="color:var(--text-muted);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82L12 22z"></path></svg>
             </div>
@@ -711,7 +711,7 @@
      FIREBASE MODULE — একই SDK (12.10.0) login.html এর মতো
      Config /api/config থেকে আনা হচ্ছে
 ════════════════════════════════════════════════════════════════════════ -->
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
     import { getDatabase, ref, get, push, set, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
@@ -1373,26 +1373,51 @@ STRICT FORMATTING RULES — follow every rule exactly:
         el.className='message msg-ai';
         chatView.appendChild(el);
         var tm=text.match(/<think>([\s\S]*?)<\/think>/i);
-        var thinkHtml='', content=text;
-        if(tm){
-            thinkHtml='<details class="thought-bubble"><summary class="thought-summary">💭 Thinking...</summary><div class="thought-content">'+tm[1].trim()+'</div></details>';
-            content=text.replace(tm[0],'').trim();
-        }
-        if(thinkHtml){var td=document.createElement('div');td.innerHTML=thinkHtml;el.appendChild(td.firstChild);}
-        var aiTextEl=document.createElement('div');
-        aiTextEl.className='ai-text';
-        el.appendChild(aiTextEl);
-        var cursorEl=document.createElement('span');
-        cursorEl.className='typing-cursor';
-        aiTextEl.appendChild(cursorEl);
+        var thinkRaw='', content=text;
+        if(tm){thinkRaw=tm[1].trim();content=text.replace(tm[0],'').trim();}
+
         var autoScroll=true;
         var onScroll=function(){
             var atBottom=scrollArea.scrollTop+scrollArea.clientHeight>=scrollArea.scrollHeight-80;
             autoScroll=atBottom;
         };
         scrollArea.addEventListener('scroll',onScroll,{passive:true});
+
+        // ── Thinking section typewriter (3× faster) ──
+        if(thinkRaw){
+            var thinkWrap=document.createElement('details');
+            thinkWrap.className='thought-bubble';
+            thinkWrap.innerHTML='<summary class="thought-summary">💭 Thinking...</summary>';
+            var thinkContentEl=document.createElement('div');
+            thinkContentEl.className='thought-content';
+            thinkWrap.appendChild(thinkContentEl);
+            el.appendChild(thinkWrap);
+            var cursorT=document.createElement('span');
+            cursorT.className='typing-cursor';
+            thinkContentEl.appendChild(cursorT);
+            var THINK_CPT=15, THINK_MS=5;
+            var typedT='', charsT=thinkRaw.split('');
+            for(var ti=0;ti<charsT.length;ti+=THINK_CPT){
+                typedT+=charsT.slice(ti,ti+THINK_CPT).join('');
+                thinkContentEl.textContent=typedT;
+                thinkContentEl.appendChild(cursorT);
+                if(autoScroll)scrollArea.scrollTop=scrollArea.scrollHeight;
+                await new Promise(function(r){setTimeout(r,THINK_MS);});
+            }
+            cursorT.remove();
+            thinkContentEl.textContent=thinkRaw;
+        }
+
+        // ── Main response typewriter ──
+        var aiTextEl=document.createElement('div');
+        aiTextEl.className='ai-text';
+        el.appendChild(aiTextEl);
+        var cursorEl=document.createElement('span');
+        cursorEl.className='typing-cursor';
+        aiTextEl.appendChild(cursorEl);
+
         var typed='', chars=content.split('');
-        var CHARS_PER_TICK=5, TICK_MS=14, RENDER_EVERY=70, lastRender=0;
+        var CHARS_PER_TICK=12, TICK_MS=8, RENDER_EVERY=50, lastRender=0;
         for(var i=0;i<chars.length;i+=CHARS_PER_TICK){
             typed+=chars.slice(i,i+CHARS_PER_TICK).join('');
             var now=Date.now();
@@ -1408,7 +1433,7 @@ STRICT FORMATTING RULES — follow every rule exactly:
         scrollArea.removeEventListener('scroll',onScroll);
         cursorEl.remove();
         var finalH='';
-        if(thinkHtml) finalH+=thinkHtml;
+        if(thinkRaw) finalH+='<details class="thought-bubble"><summary class="thought-summary">💭 Thinking...</summary><div class="thought-content">'+thinkRaw+'</div></details>';
         finalH+='<div class="ai-text">'+parseMD(content)+'</div>';
         finalH+='<div class="msg-actions"><div class="action-chip" onclick="copyMsg(this)">'
                +'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>'
@@ -1696,7 +1721,7 @@ STRICT FORMATTING RULES — follow every rule exactly:
         loadingBar.style.width='100%';
         loadingText.innerText='সংরক্ষণ করা হচ্ছে...';
         await new Promise(function(r){setTimeout(r,200);});
-        try{pdf.save('KJP_'+cMode+'_Solution.pdf');showToast("PDF তৈরি হয়েছে! ✓","success");}
+try{pdf.save('KJP_'+cMode+'_Solution.pdf');showToast("PDF তৈরি হয়েছে! ✓","success");}
         catch(e){showToast("PDF Error: "+e.message,"error");}
         finally{loadingEl.style.display='none';staging.innerHTML='';loadingBar.style.width='0%';}
     };
