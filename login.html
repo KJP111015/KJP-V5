@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KJP AI · Professional Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+        :root {
+            --bg-main: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border-light: #e2e8f0;
+            --error-bg: #fef2f2;
+            --error-border: #fecaca;
+            --error-text: #b91c1c;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --success-text: #15803d;
+            --warn-bg: #fffbeb;
+            --warn-border: #fde68a;
+            --warn-text: #92400e;
+            --spinner-color: #2563eb;
+        }
+
+        html { font-size: 16px; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .login-panel,
+        .signup-panel,
+        .forgot-password-panel,
+        .verify-panel,
+        .loading-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem 2rem 2.5rem;
+            background: transparent;
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
+            display: none;
+            animation: fadeSlide 0.35s cubic-bezier(0.2,0.9,0.3,1) backwards;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+
+        @keyframes fadeSlide {
+            0%   { opacity:0; transform:translateY(12px); }
+            100% { opacity:1; transform:translateY(0); }
+        }
+
+        /* ── Logo ── */
+        .logo-container { text-align: center; margin-bottom: 2.75rem; }
+
+        .logo-text {
+            font-size: 2.75rem;
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            color: var(--text-primary);
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        .logo-text span { color: var(--accent); }
+
+        .description {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 2.25rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* ── Form fields ── */
+        .form-group { margin-bottom: 1.8rem; position: relative; }
+
+        .input-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 0 0.5rem;
+            font-size: 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border-light);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, padding-left 0.2s;
+            font-weight: 450;
+        }
+
+        .form-input:focus {
+            border-bottom-color: var(--accent);
+            padding-left: 0.25rem;
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+
+        .password-container { position: relative; width: 100%; }
+        .password-container .form-input { padding-right: 2.5rem; }
+
+        /* ── Password toggle — pure SVG ── */
+        .password-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover { color: var(--text-primary); }
+
+        .password-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: block;
+        }
+
+        .eye-on  { display: block; }
+        .eye-off { display: none; }
+
+        .action-row {
+            display: flex;
+            justify-content: flex-end;
+            margin: 1rem 0 2rem;
+        }
+
+        .forgot-password-link {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-bottom: 1px dashed transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .forgot-password-link:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ── Privacy checkbox ── */
+        .privacy-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 0 0 1.5rem;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border-light);
+            background: #f8fafc;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .privacy-row.checked {
+            border-color: var(--accent);
+            background: rgba(37,99,235,0.04);
+        }
+
+        .privacy-row.error-highlight {
+            border-color: var(--error-border) !important;
+            background: var(--error-bg) !important;
+            animation: shake 0.35s ease;
+        }
+
+        @keyframes shake {
+            0%,100% { transform:translateX(0); }
+            20%     { transform:translateX(-5px); }
+            60%     { transform:translateX(5px); }
+        }
+
+        .privacy-checkbox-wrap {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .privacy-checkbox-wrap input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .custom-check {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-light);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, border-color 0.15s;
+            pointer-events: none;
+        }
+
+        .privacy-checkbox-wrap input:checked + .custom-check {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .custom-check svg {
+            display: none;
+            width: 11px;
+            height: 11px;
+            stroke: #fff;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .privacy-checkbox-wrap input:checked + .custom-check svg { display: block; }
+
+        .privacy-text {
+            font-size: 0.82rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
+        }
+
+        .privacy-text a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.15s;
+        }
+
+        .privacy-text a:hover { border-bottom-color: var(--accent); }
+
+        /* ── Buttons ── */
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 0.5rem;
+            border-radius: 0;
+        }
+
+        .btn-submit:hover  { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(1px); }
+        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+
+        .btn-create {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-light);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+            margin-top: 1.25rem;
+            border-radius: 0;
+        }
+
+        .btn-create:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(37,99,235,0.04);
+        }
+
+        /* ── Back link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 1.75rem;
+            transition: color 0.2s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .signup-panel .back-link {
+            justify-content: flex-start;
+            margin-bottom: 1.25rem;
+            margin-top: 0;
+        }
+
+        .back-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .back-link svg {
+            margin-right: 6px;
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        /* ── Messages ── */
+        .message {
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.75rem;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-width: 1px;
+            border-style: solid;
+            background: transparent;
+            border-radius: 0;
+        }
+
+        .error-message   { background:var(--error-bg);   border-color:var(--error-border);   color:var(--error-text); }
+        .success-message { background:var(--success-bg);  border-color:var(--success-border); color:var(--success-text); }
+        .warn-message    { background:var(--warn-bg);     border-color:var(--warn-border);    color:var(--warn-text); }
+
+        /* ── Verify panel ── */
+        .verify-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.75rem;
+        }
+
+        .verify-icon svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--accent);
+            stroke-width: 1.75;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .verify-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .verify-desc {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin-bottom: 0.5rem;
+        }
+
+        .verify-email-highlight {
+            display: block;
+            text-align: center;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 0.95rem;
+            margin-bottom: 1.75rem;
+            word-break: break-all;
+        }
+
+        .verify-steps {
+            background: #f8fafc;
+            border: 1px solid var(--border-light);
+            padding: 14px 18px;
+            margin-bottom: 1.75rem;
+        }
+
+        .verify-steps p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .verify-steps p + p { margin-top: 8px; }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .btn-verify-done {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            border-radius: 0;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-verify-done svg {
+            width: 17px; height: 17px;
+            stroke: #fff; fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .btn-verify-done:hover   { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-verify-done:active  { transform: translateY(1px); }
+        .btn-verify-done:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+
+        .btn-resend {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .btn-resend svg {
+            width: 15px; height: 15px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .btn-resend:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-resend:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .resend-timer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.6rem;
+        }
+
+        .verify-message { margin-top: 1rem; margin-bottom: 0; }
+
+        /* ── Spinner ── */
+        .spinner {
+            width: 54px;
+            height: 54px;
+            border: 3px solid rgba(37,99,235,0.1);
+            border-left: 3px solid var(--spinner-color);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+
+        .loading-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            body { padding: 1rem; }
+            .login-panel,.signup-panel,.forgot-password-panel,.verify-panel,.loading-container {
+                padding: 1.5rem 1.25rem; max-width: 100%;
+            }
+            .logo-text { font-size: 2.25rem; }
+            .form-input { font-size: 0.95rem; }
+        }
+
+        @media (max-width: 360px) {
+            .login-panel,.signup-panel,.forgot-password-panel,.verify-panel { padding: 1.25rem 1rem; }
+            .logo-text { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING -->
+    <div class="loading-container" id="loadingContainer">
+        <div class="spinner"></div>
+        <div class="loading-text">Checking authentication...</div>
+    </div>
+
+    <!-- ═══════════════════════════════ LOGIN PANEL ═══════════════════════════════ -->
+    <main class="login-panel" id="loginPanel">
+        <div class="logo-container">
+            <div class="logo-text">ALPHA</div>
+        </div>
+
+        <div id="loginMessage" class="message" style="display:none;"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email" class="input-label">Email</label>
+                <input type="email" id="email" class="form-input" placeholder="work@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="input-label">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                    <button type="button" class="password-toggle" id="toggleLoginPassword" aria-label="Toggle password visibility">
+                        <svg class="eye-on" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off" style="display:none" viewBox="0 0 24 24">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <a href="#" class="forgot-password-link" id="forgotPasswordLink">Forgot Password?</a>
+            </div>
+
+            <!-- Privacy Policy Checkbox -->
+            <div class="privacy-row" id="loginPrivacyRow">
+                <label class="privacy-checkbox-wrap">
+                    <input type="checkbox" id="loginPrivacyCheckbox">
+                    <span class="custom-check">
+                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+                    </span>
+                </label>
+                <p class="privacy-text">
+                    I have read and agree to KJP AI's
+                    <a href="privacy-policy.html" target="_blank">Privacy Policy</a>
+                    and <a href="terms.html" target="_blank">Terms of Service</a>.
+                </p>
+            </div>
+
+            <button type="submit" class="btn-submit" id="loginBtn">Sign In</button>
+            <button type="button" class="btn-create" id="createAccountBtn">Create new account</button>
+        </form>
+    </main>
+
+    <!-- ═══════════════════════════════ SIGNUP PANEL ═══════════════════════════════ -->
+    <main class="signup-panel" id="signupPanel">
+        <a href="#" class="back-link" id="backToLogin">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Login
+        </a>
+
+        <div class="logo-container">
+            <div class="logo-text">ALPHA</div>
+        </div>
+
+        <div id="signupMessage" class="message" style="display:none;"></div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="name" class="input-label">Full Name</label>
+                <input type="text" id="name" class="form-input" placeholder="Your Full Name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-email" class="input-label">Email</label>
+                <input type="email" id="signup-email" class="form-input" placeholder="hello@domain.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="signup-password" class="input-label">Password</label>
+                <div class="password-container">
+                    <input type="password" id="signup-password" class="form-input" placeholder="at least 6 characters" minlength="6" required>
+                    <button type="button" class="password-toggle" id="toggleSignupPassword" aria-label="Toggle password visibility">
+                        <svg class="eye-on" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off" style="display:none" viewBox="0 0 24 24">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password" class="input-label">Confirm Password</label>
+                <div class="password-container">
+                    <input type="password" id="confirm-password" class="form-input" placeholder="retype password" required>
+                    <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+                        <svg class="eye-on" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off" style="display:none" viewBox="0 0 24 24">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Privacy Policy Checkbox -->
+            <div class="privacy-row" id="privacyRow">
+                <label class="privacy-checkbox-wrap">
+                    <input type="checkbox" id="privacyCheckbox">
+                    <span class="custom-check">
+                        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+                    </span>
+                </label>
+                <p class="privacy-text">
+                    I have read and agree to KJP AI's
+                    <a href="privacy-policy.html" target="_blank">Privacy Policy</a>
+                    and <a href="terms.html" target="_blank">Terms of Service</a>.
+                    This is required to create an account.
+                </p>
+            </div>
+
+            <button type="submit" class="btn-submit" id="signupBtn">Create Account</button>
+        </form>
+    </main>
+
+    <!-- ═══════════════════════════════ FORGOT PASSWORD PANEL ═══════════════════════════════ -->
+    <main class="forgot-password-panel" id="forgotPasswordPanel">
+        <div class="logo-container">
+            <div class="logo-text">ALPHA</div>
+        </div>
+        <p class="description">Enter your email and we'll send a secure reset link.</p>
+
+        <div id="forgotPasswordMessage" class="message" style="display:none;"></div>
+
+        <form id="forgotPasswordForm">
+            <div class="form-group">
+                <label for="reset-email" class="input-label">Email</label>
+                <input type="email" id="reset-email" class="form-input" placeholder="registered@email.com" required>
+            </div>
+
+            <button type="submit" class="btn-submit" id="resetBtn">Send Reset Link</button>
+        </form>
+
+        <a href="#" class="back-link" id="backToLoginFromForgot">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to Login
+        </a>
+    </main>
+
+    <!-- ═══════════════════════════════ VERIFY EMAIL PANEL ═══════════════════════════════ -->
+    <main class="verify-panel" id="verifyPanel">
+        <div class="verify-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+        </div>
+
+        <h2 class="verify-title">Verify Your Email</h2>
+        <p class="verify-desc">A verification link has been sent to:</p>
+        <span class="verify-email-highlight" id="verifyEmailDisplay"></span>
+
+        <div class="verify-steps">
+            <p><span class="step-num">1</span> Check your inbox or Spam folder.</p>
+            <p><span class="step-num">2</span> Click the <strong>"Verify Email"</strong> link in the email.</p>
+            <p><span class="step-num">3</span> Return here and click the button below.</p>
+        </div>
+
+        <div id="verifyMessage" class="message verify-message" style="display:none;"></div>
+
+        <button class="btn-verify-done" id="verifyDoneBtn">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            I've verified — Continue
+        </button>
+
+        <button class="btn-resend" id="resendBtn">
+            <svg viewBox="0 0 24 24">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 .49-3.45"/>
+            </svg>
+            Resend verification email
+        </button>
+        <p class="resend-timer" id="resendTimer"></p>
+
+        <a href="#" class="back-link" id="backToLoginFromVerify" style="display:flex;justify-content:center;margin-top:1.5rem;">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Use a different account
+        </a>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         FIREBASE — Firebase config সার্ভার থেকে নেওয়া হচ্ছে (/api/config)
+         index.html এবং login.html একই SDK version (12.10.0) ব্যবহার করে
+    ════════════════════════════════════════════════════════════════════ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
+            sendEmailVerification,
+            onAuthStateChanged,
+            signOut,
+            reload
+        } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+        import {
+            getDatabase,
+            ref,
+            set,
+            update
+        } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+        // ── Config সার্ভার থেকে নেওয়া হচ্ছে ──
+        const _cfgRes = await fetch('/api/config');
+        const _cfg    = await _cfgRes.json();
+        const firebaseConfig = _cfg.firebase;
+
+        const app      = initializeApp(firebaseConfig);
+        const auth     = getAuth(app);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            /* ── DOM refs ── */
+            const loadingContainer    = document.getElementById('loadingContainer');
+            const loginPanel          = document.getElementById('loginPanel');
+            const signupPanel         = document.getElementById('signupPanel');
+            const forgotPasswordPanel = document.getElementById('forgotPasswordPanel');
+            const verifyPanel         = document.getElementById('verifyPanel');
+
+            const createAccountBtn      = document.getElementById('createAccountBtn');
+            const backToLogin           = document.getElementById('backToLogin');
+            const backToLoginFromForgot = document.getElementById('backToLoginFromForgot');
+            const backToLoginFromVerify = document.getElementById('backToLoginFromVerify');
+            const forgotPasswordLink    = document.getElementById('forgotPasswordLink');
+
+            const loginForm          = document.getElementById('loginForm');
+            const signupForm         = document.getElementById('signupForm');
+            const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+
+            const loginBtn  = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            const resetBtn  = document.getElementById('resetBtn');
+
+            const loginMessage          = document.getElementById('loginMessage');
+            const signupMessage         = document.getElementById('signupMessage');
+            const forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
+            const verifyMessage         = document.getElementById('verifyMessage');
+
+            const loginPrivacyCheckbox = document.getElementById('loginPrivacyCheckbox');
+            const loginPrivacyRow      = document.getElementById('loginPrivacyRow');
+            const privacyCheckbox      = document.getElementById('privacyCheckbox');
+            const privacyRow           = document.getElementById('privacyRow');
+
+            const verifyEmailDisplay = document.getElementById('verifyEmailDisplay');
+            const verifyDoneBtn      = document.getElementById('verifyDoneBtn');
+            const resendBtn          = document.getElementById('resendBtn');
+            const resendTimer        = document.getElementById('resendTimer');
+
+            /* ── Helpers ── */
+            function hideAll() {
+                [loginPanel, signupPanel, forgotPasswordPanel, verifyPanel, loadingContainer]
+                    .forEach(p => p.style.display = 'none');
+            }
+
+            function show(panel) { hideAll(); panel.style.display = 'block'; }
+
+            function clearMessages() {
+                [loginMessage, signupMessage, forgotPasswordMessage, verifyMessage]
+                    .forEach(m => m.style.display = 'none');
+            }
+
+            function showMessage(el, msg, type) {
+                el.textContent   = msg;
+                el.className     = 'message ' + type + '-message';
+                el.style.display = 'block';
+            }
+
+            /* ── Privacy checkbox visual sync ── */
+            loginPrivacyCheckbox.addEventListener('change', function () {
+                loginPrivacyRow.classList.toggle('checked', this.checked);
+                loginPrivacyRow.classList.remove('error-highlight');
+            });
+
+            privacyCheckbox.addEventListener('change', function () {
+                privacyRow.classList.toggle('checked', this.checked);
+                privacyRow.classList.remove('error-highlight');
+            });
+
+            /* ── Password toggle — SVG eye swap ── */
+            function setupPasswordToggle(btn, input) {
+                btn.addEventListener('click', function () {
+                    const hidden = input.getAttribute('type') === 'password';
+                    input.setAttribute('type', hidden ? 'text' : 'password');
+                    btn.querySelector('.eye-on').style.display  = hidden ? 'none'  : 'block';
+                    btn.querySelector('.eye-off').style.display = hidden ? 'block' : 'none';
+                });
+            }
+
+            setupPasswordToggle(
+                document.getElementById('toggleLoginPassword'),
+                document.getElementById('password')
+            );
+            setupPasswordToggle(
+                document.getElementById('toggleSignupPassword'),
+                document.getElementById('signup-password')
+            );
+            setupPasswordToggle(
+                document.getElementById('toggleConfirmPassword'),
+                document.getElementById('confirm-password')
+            );
+
+            /* ── Save user to DB ── */
+            function saveUserData(uid, name, email) {
+                return set(ref(database, 'users/' + uid), {
+                    name, email,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: new Date().toISOString(),
+                    privacyPolicyAccepted: true,
+                    privacyPolicyAcceptedAt: new Date().toISOString()
+                });
+            }
+
+            /* ── Auth state observer ── */
+            onAuthStateChanged(auth, (user) => {
+                loadingContainer.style.display = 'none';
+                if (user) {
+                    user.emailVerified
+                        ? (window.location.href = 'index.html')
+                        : showVerifyPanel(user);
+                } else {
+                    show(loginPanel);
+                }
+            });
+
+            /* ── Navigation ── */
+            createAccountBtn.addEventListener('click', () => { clearMessages(); show(signupPanel); });
+
+            backToLogin.addEventListener('click', function (e) {
+                e.preventDefault();
+                clearMessages();
+                if (auth.currentUser && !auth.currentUser.emailVerified) signOut(auth);
+                show(loginPanel);
+            });
+
+            forgotPasswordLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                clearMessages();
+                show(forgotPasswordPanel);
+            });
+
+            backToLoginFromForgot.addEventListener('click', function (e) {
+                e.preventDefault();
+                clearMessages();
+                show(loginPanel);
+            });
+
+            backToLoginFromVerify.addEventListener('click', function (e) {
+                e.preventDefault();
+                clearMessages();
+                signOut(auth).then(() => show(loginPanel));
+            });
+
+            /* ── Verify panel ── */
+            let resendCountdown = null;
+
+            function showVerifyPanel(user) {
+                verifyEmailDisplay.textContent = user.email;
+                clearMessages();
+                hideAll();
+                verifyPanel.style.display = 'block';
+                startResendCooldown(60);
+            }
+
+            function startResendCooldown(seconds) {
+                resendBtn.disabled = true;
+                let remaining = seconds;
+                resendTimer.textContent = 'Resend available in ' + remaining + 's';
+                clearInterval(resendCountdown);
+                resendCountdown = setInterval(() => {
+                    remaining--;
+                    if (remaining <= 0) {
+                        clearInterval(resendCountdown);
+                        resendBtn.disabled = false;
+                        resendTimer.textContent = '';
+                    } else {
+                        resendTimer.textContent = 'Resend available in ' + remaining + 's';
+                    }
+                }, 1000);
+            }
+
+            verifyDoneBtn.addEventListener('click', async function () {
+                const user = auth.currentUser;
+                if (!user) { show(loginPanel); return; }
+
+                verifyDoneBtn.disabled = true;
+                verifyDoneBtn.lastChild.textContent = ' Checking...';
+
+                try {
+                    await reload(user);
+                    if (user.emailVerified) {
+                        showMessage(verifyMessage, 'Email verified successfully! Redirecting...', 'success');
+                        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+                    } else {
+                        showMessage(verifyMessage, 'Email not yet verified. Please check your inbox and click the link.', 'warn');
+                        verifyDoneBtn.disabled = false;
+                        verifyDoneBtn.lastChild.textContent = " I've verified — Continue";
+                    }
+                } catch (err) {
+                    showMessage(verifyMessage, 'Could not check verification. Please try again.', 'error');
+                    verifyDoneBtn.disabled = false;
+                    verifyDoneBtn.lastChild.textContent = " I've verified — Continue";
+                }
+            });
+
+            resendBtn.addEventListener('click', async function () {
+                const user = auth.currentUser;
+                if (!user) return;
+                resendBtn.disabled = true;
+                try {
+                    await sendEmailVerification(user);
+                    showMessage(verifyMessage, 'Verification email resent. Check your inbox.', 'success');
+                    startResendCooldown(60);
+                } catch (err) {
+                    showMessage(verifyMessage, 'Failed to resend. Please wait and try again.', 'error');
+                    resendBtn.disabled = false;
+                }
+            });
+
+            /* ── LOGIN ── */
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const email    = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                if (!loginPrivacyCheckbox.checked) {
+                    loginPrivacyRow.classList.add('error-highlight');
+                    showMessage(loginMessage, 'You must agree to the Privacy Policy to sign in.', 'error');
+                    loginPrivacyRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+
+                loginBtn.disabled    = true;
+                loginBtn.textContent = 'Signing in...';
+
+                try {
+                    const cred = await signInWithEmailAndPassword(auth, email, password);
+                    const user = cred.user;
+
+                    if (!user.emailVerified) {
+                        showMessage(loginMessage, 'Email not verified. Please verify your account first.', 'warn');
+                        setTimeout(() => showVerifyPanel(user), 1200);
+                        return;
+                    }
+
+                    await update(ref(database, 'users/' + user.uid), { lastLogin: new Date().toISOString() });
+                    showMessage(loginMessage, 'Login successful!', 'success');
+                    setTimeout(() => { window.location.href = 'index.html'; }, 900);
+
+                } catch (error) {
+                    let msg = 'Login failed. Please try again.';
+                    if (['auth/user-not-found','auth/invalid-credential','auth/wrong-password'].includes(error.code))
+                        msg = 'Incorrect email or password.';
+                    else if (error.code === 'auth/invalid-email')     msg = 'Invalid email format.';
+                    else if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
+                    else if (error.code === 'auth/user-disabled')     msg = 'This account has been disabled.';
+                    showMessage(loginMessage, msg, 'error');
+                } finally {
+                    loginBtn.disabled    = false;
+                    loginBtn.textContent = 'Sign In';
+                }
+            });
+
+            /* ── SIGNUP ── */
+            signupForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const name            = document.getElementById('name').value.trim();
+                const email           = document.getElementById('signup-email').value.trim();
+                const password        = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+
+                if (!name) {
+                    showMessage(signupMessage, 'Please enter your full name.', 'error'); return;
+                }
+                if (password !== confirmPassword) {
+                    showMessage(signupMessage, 'Passwords do not match.', 'error'); return;
+                }
+                if (password.length < 6) {
+                    showMessage(signupMessage, 'Password must be at least 6 characters.', 'error'); return;
+                }
+                if (!privacyCheckbox.checked) {
+                    privacyRow.classList.add('error-highlight');
+                    showMessage(signupMessage, 'You must agree to the Privacy Policy to create an account.', 'error');
+                    privacyRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+
+                signupBtn.disabled    = true;
+                signupBtn.textContent = 'Creating account...';
+
+                try {
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = cred.user;
+                    await saveUserData(user.uid, name, email);
+                    await sendEmailVerification(user);
+                    showMessage(signupMessage, 'Account created! Please verify your email to continue.', 'success');
+                    setTimeout(() => showVerifyPanel(user), 1200);
+
+                } catch (error) {
+                    let msg = 'Signup failed. Please try again.';
+                    if (error.code === 'auth/email-already-in-use') msg = 'This email is already in use.';
+                    else if (error.code === 'auth/invalid-email')   msg = 'Invalid email address.';
+                    else if (error.code === 'auth/weak-password')   msg = 'Password is too weak.';
+                    else console.error(error);
+                    showMessage(signupMessage, msg, 'error');
+                } finally {
+                    signupBtn.disabled    = false;
+                    signupBtn.textContent = 'Create Account';
+                }
+            });
+
+            /* ── PASSWORD RESET ── */
+            forgotPasswordForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const email = document.getElementById('reset-email').value;
+
+                resetBtn.disabled    = true;
+                resetBtn.textContent = 'Sending...';
+
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    showMessage(forgotPasswordMessage, 'Reset link sent! Check your inbox.', 'success');
+                    document.getElementById('reset-email').value = '';
+                } catch (error) {
+                    let msg = 'Failed to send reset email.';
+                    if (error.code === 'auth/user-not-found')         msg = 'No account found with this email.';
+                    else if (error.code === 'auth/invalid-email')     msg = 'Invalid email address.';
+                    else if (error.code === 'auth/too-many-requests') msg = 'Too many requests. Try again later.';
+                    showMessage(forgotPasswordMessage, msg, 'error');
+                } finally {
+                    resetBtn.disabled    = false;
+                    resetBtn.textContent = 'Send Reset Link';
+                }
+            });
+
+        }); // DOMContentLoaded
+    </script>
+</body>
+</html>
